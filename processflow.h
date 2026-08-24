@@ -1,6 +1,8 @@
 #ifndef PROCESSFLOW_H
 #define PROCESSFLOW_H
 
+#include <sys/types.h>
+
 #define MAX_LINE 1024
 #define MAX_ARGS 64
 #define MAX_TASKS 128
