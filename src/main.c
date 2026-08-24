@@ -20,6 +20,8 @@ int dispatch(int argc, char *argv[]) {
 
         if (strcmp(argv[1], "sequential") == 0) {
             executor_run_sequential(argc - 2, &argv[2]);
+        } else if (strcmp(argv[1], "parallel") == 0) {
+            executor_run_parallel(argc - 2, &argv[2]);
         } else {
             fprintf(stderr, "Erro: modo de execução '%s' ainda não suportado nesta parte\n", argv[1]);
         }
