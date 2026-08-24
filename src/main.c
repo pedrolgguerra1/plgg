@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "task.h"
 #include "executor.h"
+#include "job.h"
 
 int dispatch(int argc, char *argv[]) {
     if (strcmp(argv[0], "task") == 0) {
@@ -29,6 +30,30 @@ int dispatch(int argc, char *argv[]) {
 
     if (strcmp(argv[0], "workdir") == 0) {
         task_set_workdir(argc, argv);
+        return 0;
+    }
+
+    if (strcmp(argv[0], "start") == 0) {
+        if (argc != 2) {
+            fprintf(stderr, "Erro: uso correto é 'start <tarefa>'\n");
+            return 0;
+        }
+        job_start(argv[1]);
+        return 0;
+    }
+
+    if (strcmp(argv[0], "jobs") == 0) {
+        job_list();
+        return 0;
+    }
+
+    if (strcmp(argv[0], "wait") == 0) {
+        if (argc != 2) {
+            fprintf(stderr, "Erro: uso correto é 'wait <jobId>'\n");
+            return 0;
+        }
+        int job_id = atoi(argv[1]);
+        job_wait(job_id);
         return 0;
     }
 
@@ -132,6 +157,7 @@ int run_workflow(const char *filename) {
 
 int main(int argc, char *argv[]) {
     task_init();
+    job_init();
 
     if (argc > 2) {
         fprintf(stderr, "Uso: %s [workflowFile]\n", argv[0]);
