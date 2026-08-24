@@ -52,3 +52,62 @@ Task *task_find(const char *name) {
     }
     return NULL;
 }
+
+int task_set_input(int argc, char *argv_tokens[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Erro: uso correto é 'input <tarefa> <arquivo>'\n");
+        return -1;
+    }
+
+    Task *t = task_find(argv_tokens[1]);
+    if (t == NULL) {
+        fprintf(stderr, "Erro: tarefa '%s' não encontrada\n", argv_tokens[1]);
+        return -1;
+    }
+
+    if (t->input_file != NULL) {
+        free(t->input_file);
+    }
+    t->input_file = strdup(argv_tokens[2]);
+    return 0;
+}
+
+int task_set_output(int argc, char *argv_tokens[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Erro: uso correto é 'output <tarefa> <arquivo>'\n");
+        return -1;
+    }
+
+    Task *t = task_find(argv_tokens[1]);
+    if (t == NULL) {
+        fprintf(stderr, "Erro: tarefa '%s' não encontrada\n", argv_tokens[1]);
+        return -1;
+    }
+
+    if (t->output_file != NULL) {
+        free(t->output_file);
+    }
+    t->output_file = strdup(argv_tokens[2]);
+    t->append_output = 0;
+    return 0;
+}
+
+int task_set_append(int argc, char *argv_tokens[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Erro: uso correto é 'append <tarefa> <arquivo>'\n");
+        return -1;
+    }
+
+    Task *t = task_find(argv_tokens[1]);
+    if (t == NULL) {
+        fprintf(stderr, "Erro: tarefa '%s' não encontrada\n", argv_tokens[1]);
+        return -1;
+    }
+
+    if (t->output_file != NULL) {
+        free(t->output_file);
+    }
+    t->output_file = strdup(argv_tokens[2]);
+    t->append_output = 1;
+    return 0;
+}

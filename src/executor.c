@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include "executor.h"
 #include "task.h"
@@ -15,6 +16,27 @@ int executor_run_single(Task *t) {
     }
 
     if (pid == 0) {
+        if (t->input_file != NULL) {
+            int fd_in = open(t->input_file, O_RDONLY);
+            if (fd_in < 0) {
+                fprintf(stderr, "Erro: não foi possível abrir o arquivo de entrada '%s'\n", t->input_file);
+                exit(126);
+            }
+            dup2(fd_in, STDIN_FILENO);
+            close(fd_in);
+        }
+
+        if (t->output_file != NULL) {
+            int flags = O_WRONLY | O_CREAT | (t->append_output ? O_APPEND : O_TRUNC);
+            int fd_out = open(t->output_file, flags, 0644);
+            if (fd_out < 0) {
+                fprintf(stderr, "Erro: não foi possível abrir o arquivo de saída '%s'\n", t->output_file);
+                exit(126);
+            }
+            dup2(fd_out, STDOUT_FILENO);
+            close(fd_out);
+        }
+
         execvp(t->argv[0], t->argv);
         fprintf(stderr, "Erro: não foi possível executar o programa '%s'\n", t->argv[0]);
         exit(127);
