@@ -16,6 +16,14 @@ int executor_run_single(Task *t) {
     }
 
     if (pid == 0) {
+        const char *wd = task_get_workdir();
+        if (wd != NULL) {
+            if (chdir(wd) != 0) {
+                fprintf(stderr, "Erro: não foi possível acessar o diretório '%s'\n", wd);
+                exit(126);
+            }
+        }
+
         if (t->input_file != NULL) {
             int fd_in = open(t->input_file, O_RDONLY);
             if (fd_in < 0) {

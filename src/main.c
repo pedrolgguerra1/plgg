@@ -27,6 +27,11 @@ int dispatch(int argc, char *argv[]) {
         return 0;
     }
 
+    if (strcmp(argv[0], "workdir") == 0) {
+        task_set_workdir(argc, argv);
+        return 0;
+    }
+
     if (strcmp(argv[0], "run") == 0) {
         if (argc < 3) {
             fprintf(stderr, "Erro: uso correto é 'run sequential|parallel|pipe <tarefa1> [tarefa2...]'\n");

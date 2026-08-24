@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "task.h"
 
 static Task tasks[MAX_TASKS];
 static int task_count = 0;
+static char current_workdir[MAX_LINE] = "";
 
 void task_init(void) {
     task_count = 0;
+    current_workdir[0] = '\0';
 }
 
 int task_register(int argc, char *argv_tokens[]) {
@@ -110,4 +113,28 @@ int task_set_append(int argc, char *argv_tokens[]) {
     t->output_file = strdup(argv_tokens[2]);
     t->append_output = 1;
     return 0;
+}
+
+int task_set_workdir(int argc, char *argv_tokens[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Erro: uso correto é 'workdir <diretório>'\n");
+        return -1;
+    }
+
+    struct stat st;
+    if (stat(argv_tokens[1], &st) != 0 || !S_ISDIR(st.st_mode)) {
+        fprintf(stderr, "Erro: diretório '%s' não existe\n", argv_tokens[1]);
+        return -1;
+    }
+
+    strncpy(current_workdir, argv_tokens[1], MAX_LINE - 1);
+    current_workdir[MAX_LINE - 1] = '\0';
+    return 0;
+}
+
+const char *task_get_workdir(void) {
+    if (current_workdir[0] == '\0') {
+        return NULL;
+    }
+    return current_workdir;
 }
