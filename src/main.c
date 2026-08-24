@@ -2,19 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../processflow.h"
+#include "parser.h"
 
 int process_line(char *line) {
     line[strcspn(line, "\n")] = '\0';
-
-    if (strcmp(line, "exit") == 0) {
-        return 1;
-    }
 
     if (strlen(line) == 0) {
         return 0;
     }
 
-    printf("[debug] comando recebido: %s\n", line);
+    char *argv[MAX_ARGS];
+    char line_copy[MAX_LINE];
+    strncpy(line_copy, line, MAX_LINE - 1);
+    line_copy[MAX_LINE - 1] = '\0';
+
+    int argc = parse_line(line_copy, argv);
+
+    if (argc == 0) {
+        return 0;
+    }
+
+    if (strcmp(argv[0], "exit") == 0) {
+        return 1;
+    }
+
+    printf("[debug] argc=%d -> ", argc);
+    for (int i = 0; i < argc; i++) {
+        printf("[%s] ", argv[i]);
+    }
+    printf("\n");
 
     return 0;
 }
