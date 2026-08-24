@@ -95,3 +95,78 @@ void executor_run_parallel(int count, char *names[]) {
         }
     }
 }
+
+void executor_run_pipe(int count, char *names[]) {
+    if (count < 2) {
+        fprintf(stderr, "Erro: 'run pipe' precisa de pelo menos 2 tarefas\n");
+        return;
+    }
+
+    Task *tasks_to_run[MAX_TASKS];
+    for (int i = 0; i < count; i++) {
+        Task *t = task_find(names[i]);
+        if (t == NULL) {
+            fprintf(stderr, "Erro: tarefa '%s' não encontrada\n", names[i]);
+            return;
+        }
+        tasks_to_run[i] = t;
+    }
+
+    int num_pipes = count - 1;
+    int pipes[MAX_TASKS][2];
+
+    for (int i = 0; i < num_pipes; i++) {
+        if (pipe(pipes[i]) < 0) {
+            fprintf(stderr, "Erro: falha ao criar pipe\n");
+            return;
+        }
+    }
+
+    pid_t pids[MAX_TASKS];
+
+    for (int i = 0; i < count; i++) {
+        pid_t pid = fork();
+
+        if (pid < 0) {
+            fprintf(stderr, "Erro: falha ao criar processo para a tarefa '%s'\n", tasks_to_run[i]->name);
+            continue;
+        }
+
+        if (pid == 0) {
+            if (i > 0) {
+                dup2(pipes[i - 1][0], STDIN_FILENO);
+            }
+            if (i < num_pipes) {
+                dup2(pipes[i][1], STDOUT_FILENO);
+            }
+
+            for (int j = 0; j < num_pipes; j++) {
+                close(pipes[j][0]);
+                close(pipes[j][1]);
+            }
+
+            execvp(tasks_to_run[i]->argv[0], tasks_to_run[i]->argv);
+            fprintf(stderr, "Erro: não foi possível executar o programa '%s'\n", tasks_to_run[i]->argv[0]);
+            exit(127);
+        }
+
+        pids[i] = pid;
+    }
+
+    for (int i = 0; i < num_pipes; i++) {
+        close(pipes[i][0]);
+        close(pipes[i][1]);
+    }
+
+    for (int i = 0; i < count; i++) {
+        int status;
+        waitpid(pids[i], &status, 0);
+
+        if (WIFEXITED(status)) {
+            int exit_code = WEXITSTATUS(status);
+            if (exit_code != 0) {
+                fprintf(stderr, "Aviso: tarefa '%s' terminou com código de saída %d\n", tasks_to_run[i]->name, exit_code);
+            }
+        }
+    }
+}

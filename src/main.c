@@ -22,8 +22,10 @@ int dispatch(int argc, char *argv[]) {
             executor_run_sequential(argc - 2, &argv[2]);
         } else if (strcmp(argv[1], "parallel") == 0) {
             executor_run_parallel(argc - 2, &argv[2]);
+        } else if (strcmp(argv[1], "pipe") == 0) {
+            executor_run_pipe(argc - 2, &argv[2]);
         } else {
-            fprintf(stderr, "Erro: modo de execução '%s' ainda não suportado nesta parte\n", argv[1]);
+            fprintf(stderr, "Erro: modo de execução '%s' não reconhecido\n", argv[1]);
         }
         return 0;
     }
