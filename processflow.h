@@ -17,4 +17,12 @@ typedef struct {
     char *workdir;
 } Task;
 
+typedef struct {
+    int job_id;
+    pid_t pid;
+    char task_name[MAX_NAME];
+    int finished;
+    int exit_code;
+} Job;
+
 #endif
