@@ -3,6 +3,32 @@
 #include <string.h>
 #include "../processflow.h"
 #include "parser.h"
+#include "task.h"
+#include "executor.h"
+
+int dispatch(int argc, char *argv[]) {
+    if (strcmp(argv[0], "task") == 0) {
+        task_register(argc, argv);
+        return 0;
+    }
+
+    if (strcmp(argv[0], "run") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "Erro: uso correto é 'run sequential|parallel|pipe <tarefa1> [tarefa2...]'\n");
+            return 0;
+        }
+
+        if (strcmp(argv[1], "sequential") == 0) {
+            executor_run_sequential(argc - 2, &argv[2]);
+        } else {
+            fprintf(stderr, "Erro: modo de execução '%s' ainda não suportado nesta parte\n", argv[1]);
+        }
+        return 0;
+    }
+
+    fprintf(stderr, "Erro: comando '%s' não reconhecido\n", argv[0]);
+    return 0;
+}
 
 int process_line(char *line) {
     line[strcspn(line, "\n")] = '\0';
@@ -26,12 +52,7 @@ int process_line(char *line) {
         return 1;
     }
 
-    printf("[debug] argc=%d -> ", argc);
-    for (int i = 0; i < argc; i++) {
-        printf("[%s] ", argv[i]);
-    }
-    printf("\n");
-
+    dispatch(argc, argv);
     return 0;
 }
 
@@ -86,6 +107,8 @@ int run_workflow(const char *filename) {
 }
 
 int main(int argc, char *argv[]) {
+    task_init();
+
     if (argc > 2) {
         fprintf(stderr, "Uso: %s [workflowFile]\n", argv[0]);
         return 1;
