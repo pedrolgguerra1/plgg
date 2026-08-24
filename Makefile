@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-SRC = src/main.c src/parser.c
+SRC = src/main.c src/parser.c src/task.c
 TARGET = processflow
 
 all: $(TARGET)
